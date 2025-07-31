@@ -1,5 +1,7 @@
 Load Libraries:\
 
+
+
 ```{r}
 library(tidyverse)
 library(tidymodels)
@@ -9,7 +11,11 @@ library(readr)
 library(dplyr)
 ```
 
+
+
 Load population data
+
+
 
 ```{r}
 population <- read_csv("population.csv")
@@ -25,7 +31,11 @@ recent_world_pop <- world_pop |>
   filter(Year > 1500)
 ```
 
+
+
 Make graph
+
+
 
 ```{r}
 recent_world_pop |>
@@ -34,3 +44,4 @@ recent_world_pop |>
   theme_minimal() +
   labs(title = "Human Population Since 1600")
 ```
+
