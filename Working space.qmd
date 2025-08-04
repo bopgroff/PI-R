@@ -89,3 +89,110 @@ ggplot(ag_and_pop, aes(x = Year)) +
   theme_minimal() +
   labs(title = "Population and Agricultural Land Over Time")
 ```
+
+Addidng tree cover loss:\
+
+```{r}
+tree_loss <- read_csv("tree-cover-loss.csv")
+
+tree_loss <-filter(tree_loss, Entity == "World")
+
+
+```
+
+Graph of tree loss and population
+
+```{r}
+
+colnames(tree_loss)[colnames(tree_loss) == "Total tree cover loss"] <- "Tree_Loss"
+pop_tree <- recent_world_pop |>
+  select(Year, Population) |>
+  inner_join(
+    tree_loss |> select(Year, Tree_Loss),
+    by = "Year"
+  )
+
+# Find scaling factor
+scale_factor_tree <- diff(range(pop_tree$Population, na.rm = TRUE)) /
+  diff(range(pop_tree$Tree_Loss, na.rm = TRUE))
+
+# Plot
+pop_tree <- recent_world_pop |>
+  select(Year, Population) |>
+  inner_join(
+    tree_loss |> select(Year, Tree_Loss),
+    by = "Year"
+  )
+
+# Find scaling factor (Population in billions, Tree Loss in millions)
+scale_factor_tree <- (diff(range(pop_tree$Population, na.rm = TRUE)) / 1e9) /
+                     (diff(range(pop_tree$Tree_Loss, na.rm = TRUE)) / 1e6)
+
+# Plot
+ggplot(pop_tree, aes(x = Year)) +
+  geom_line(aes(y = Population / 1e9, color = "Population"), size = 1) +
+  geom_line(aes(y = (Tree_Loss / 1e6) * scale_factor_tree, color = "Tree Loss"), size = 1) +
+  scale_y_continuous(
+    name = "Population (billions)",
+    sec.axis = sec_axis(~ . / scale_factor_tree, name = "Tree Cover Loss (million ha)")
+  ) +
+  scale_color_manual(
+    name = "Variable",
+    values = c("Population" = "blue", "Tree Loss" = "darkred")
+  ) +
+  theme_minimal() +
+  labs(title = "Population and Tree Cover Loss Over Time")
+```
+
+all three on one:\
+\
+
+```{r}
+full_data <- recent_world_pop |>
+  select(Year, Population) |>
+  inner_join(
+    recent_world_ag |> select(Year, Agricultural_Land),
+    by = "Year"
+  ) |>
+  inner_join(
+    tree_loss |> select(Year, Tree_Loss),
+    by = "Year"
+  )
+# Convert units
+full_data <- full_data |>
+  mutate(
+    Population = Population / 1e9,           # billions
+    Agricultural_Land = Agricultural_Land / 1e9,  # billions ha
+    Tree_Loss = Tree_Loss / 1e6              # millions ha
+  )
+
+# Pivot to long format
+plot_data <- full_data |>
+  pivot_longer(
+    cols = c(Population, Agricultural_Land, Tree_Loss),
+    names_to = "Variable",
+    values_to = "Value"
+  )
+
+ggplot(plot_data, aes(x = Year, y = Value, color = Variable)) +
+  geom_line(size = 1) +
+  scale_color_manual(
+    values = c(
+      "Population" = "blue",
+      "Agricultural_Land" = "green",
+      "Tree_Loss" = "darkred"
+    ),
+    labels = c(
+      "Population" = "Population (billions)",
+      "Agricultural_Land" = "Agricultural Land (billion ha)",
+      "Tree_Loss" = "Tree Cover Loss (million ha)"
+    ),
+    name = "Variable"
+  ) +
+  labs(
+    title = "Trends in Population, Agricultural Land, and Tree Cover Loss",
+    y = "Value",
+    x = "Year"
+  ) +
+  theme_minimal()
+```
