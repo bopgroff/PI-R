@@ -1,5 +1,7 @@
 Load Libraries:\
 
+
+
 ```{r}
 library(tidyverse)
 library(tidymodels)
@@ -9,7 +11,11 @@ library(readr)
 library(dplyr)
 ```
 
+
+
 Load population data
+
+
 
 ```{r}
 population <- read_csv("population.csv")
@@ -25,7 +31,11 @@ recent_world_pop <- world_pop |>
   filter(Year > 1500)
 ```
 
+
+
 Make graph
+
+
 
 ```{r}
 recent_world_pop |>
@@ -35,7 +45,11 @@ recent_world_pop |>
   labs(title = "Human Population Since 1600")
 ```
 
+
+
 Add land use data
+
+
 
 ```{r}
 land_use <- read_csv("land-use-agriculture-longterm.csv")
@@ -47,7 +61,11 @@ recent_world_ag <- world_ag |>
   filter(Year > 1500)
 ```
 
+
+
 Make graph
+
+
 
 ```{r}
 recent_world_ag |>
@@ -58,7 +76,11 @@ recent_world_ag |>
   labs(title = "Agricultural Land Since 1600 (ha)")
 ```
 
+
+
 Chat gpt helped me make the next graph:\
+
+
 
 ```{r}
 ag_and_pop <- recent_world_pop |>
@@ -89,3 +111,4 @@ ggplot(ag_and_pop, aes(x = Year)) +
   theme_minimal() +
   labs(title = "Population and Agricultural Land Over Time")
 ```
+
